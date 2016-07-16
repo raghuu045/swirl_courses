@@ -88,7 +88,7 @@ stop_timer <- function() {
   if(deparse(e$expr) == "stopwatch()") {
     start_time <- e$`__lesson_start_time`
     stop_time <- now()
-    print(as.period(new_interval(start_time, stop_time)))
+    print(as.period(interval(start_time, stop_time)))
   }
   TRUE
 }
@@ -119,8 +119,8 @@ coursera_on_demand <- function(){
     
     payload <- sprintf('{  
       "assignmentKey": "oHz9f68jEeW24RJH5gkutw",
-      "submitterEmail": %s,  
-      "secret": %s,  
+      "submitterEmail": "%s",  
+      "secret": "%s",  
       "parts": {  
         "CruoJ": {  
           "output": "correct"  
@@ -129,7 +129,15 @@ coursera_on_demand <- function(){
     }', email, token)
     url <- 'https://www.coursera.org/api/onDemandProgrammingScriptSubmissions.v1'
   
-    httr::POST(url, body = payload)
+    respone <- httr::POST(url, body = payload)
+    if(respone$status_code >= 200 && respone$status_code < 300){
+      message("Grade submission succeeded!")
+    } else {
+      message("Grade submission failed.")
+      message("Press ESC if you want to exit this lesson and you")
+      message("want to try to submit your grade at a later time.")
+      return(FALSE)
+    }
   }
   TRUE
 }

@@ -6,7 +6,7 @@ creates_val_identical_to <- function(correctExpr){
   e <- get("e", parent.frame())
   correctVal <- eval(parse(text=correctExpr), cleanEnv(e$snapshot))
   results <- expectThat(e$val,
-                        is_identical_to(correctVal, label=correctExpr),
+                        is_identical_to_legacy(correctVal, label=correctExpr),
                         label=deparse(e$expr))
   return(results$passed)
 }
@@ -45,8 +45,8 @@ coursera_on_demand <- function(){
     
     payload <- sprintf('{  
       "assignmentKey": "kVYXK68vEeWVdAqQVb1YyQ",
-      "submitterEmail": %s,  
-      "secret": %s,  
+      "submitterEmail": "%s",  
+      "secret": "%s",  
       "parts": {  
         "bg83i": {  
           "output": "correct"  
@@ -55,7 +55,15 @@ coursera_on_demand <- function(){
     }', email, token)
     url <- 'https://www.coursera.org/api/onDemandProgrammingScriptSubmissions.v1'
   
-    httr::POST(url, body = payload)
+    respone <- httr::POST(url, body = payload)
+    if(respone$status_code >= 200 && respone$status_code < 300){
+      message("Grade submission succeeded!")
+    } else {
+      message("Grade submission failed.")
+      message("Press ESC if you want to exit this lesson and you")
+      message("want to try to submit your grade at a later time.")
+      return(FALSE)
+    }
   }
   TRUE
 }
